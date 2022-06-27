@@ -1,7 +1,16 @@
 [package]
 name = "verify-call"
 version = "0.1.0"
+documentation = "https://docs.rs/verify-call"
+repository = "https://github.com/Dennis-Krasnov/Verify-Call"
+homepage = "https://github.com/Dennis-Krasnov/Verify-Call"
+description = "Utility to help test whether a method has been called on a mock."
+categories = ["development-tools::testing", "data-structures", "rust-patterns"]
+keywords = ["test", "mock", "spy", "verify"]
+license = "MIT"
+authors = ["Dennis Krasnov <dennis@krasnov.dev>"]
 edition = "2021"
+rust-version = "1.56.1"
 
 [dependencies]
 

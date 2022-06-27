@@ -1,6 +1,6 @@
 [package]
 name = "verify-call"
-version = "0.1.0"
+version = "0.1.1"
 documentation = "https://docs.rs/verify-call"
 repository = "https://github.com/Dennis-Krasnov/Verify-Call"
 homepage = "https://github.com/Dennis-Krasnov/Verify-Call"

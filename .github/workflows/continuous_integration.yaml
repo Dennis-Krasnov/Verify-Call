@@ -1,0 +1,104 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  unit_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Cache Cargo
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Unit test
+        run: cargo test
+
+  build_timings:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Cache Cargo index
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry/index/
+          key: ${{ runner.os }}-cargo-build-timings-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Download Cargo dependencies
+        run: cargo fetch
+
+      - name: Time cold build
+        run: cargo build --release --timings
+
+      - name: Upload timings report
+        uses: actions/upload-artifact@v3
+        with:
+          name: build_timings_report
+          path: target/cargo-timings/cargo-timing.html
+
+  verify_msrv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Cache Cargo
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-verify-msrv-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install cargo-msrv
+        run: |
+          wget https://github.com/foresterre/cargo-msrv/releases/download/v0.15.1/cargo-msrv_v0.15.1_Linux_x86_64.tar
+          tar -xvf cargo-msrv_v0.15.1_Linux_x86_64.tar
+
+      - name: Verify whether MSRV is satisfiable
+        run: ./cargo-msrv verify
+
+  verify_no_unused_dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Switch to nightly Rust
+        run: rustup default nightly
+
+      - name: Cache Cargo
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-verify-unused-deps-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install cargo-udeps
+        run: |
+          wget https://github.com/est31/cargo-udeps/releases/download/v0.1.27/cargo-udeps-v0.1.27-x86_64-unknown-linux-gnu.tar.gz
+          tar -xvf cargo-udeps-v0.1.27-x86_64-unknown-linux-gnu.tar.gz
+
+      - name: Verify there's no unused dependencies
+        run: ./cargo-udeps-v0.1.27-x86_64-unknown-linux-gnu/cargo-udeps udeps

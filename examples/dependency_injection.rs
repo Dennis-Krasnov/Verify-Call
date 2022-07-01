@@ -10,7 +10,17 @@ fn send_email_if_custom_domain(email_sender: impl EmailSender, email_address: &s
     email_sender.send_email(email_address)
 }
 
-fn main() {}
+struct RealEmailSender;
+impl EmailSender for RealEmailSender {
+    fn send_email(&self, _email_address: &str) -> Result<(), ()> {
+        // send email...
+        Ok(())
+    }
+}
+
+fn main() {
+    let _ = send_email_if_custom_domain(RealEmailSender, "dennis@krasnov.dev");
+}
 
 #[cfg(test)]
 mod tests {

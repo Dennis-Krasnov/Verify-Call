@@ -71,72 +71,91 @@ impl<T: Debug> Debug for Verifier<T> {
 mod tests {
     use super::*;
 
-    #[test]
-    fn should_pass_verifying_never_called() {
-        // Given
-        let (verifier, _caller) = pair::<()>();
+    mod caller {
+        use super::*;
 
-        // When
-        let calls = verifier.calls();
+        #[test]
+        fn implements_traits() {
+            use impls::impls;
+            use std::fmt::Debug;
 
-        // Then
-        assert_eq!(calls.len(), 0);
+            // Given
+            struct NotDebug;
+
+            // Then
+            assert!(impls!(Caller<i32>: Debug & Send & Sync & !Clone));
+            assert!(impls!(Caller<NotDebug>: !Debug & Send & Sync & !Clone));
+        }
+
+        #[test]
+        fn is_thread_safe() {
+            // Given
+            let (verifier, caller) = pair();
+            let handle = std::thread::spawn(move || {
+                caller.call(1);
+            });
+
+            // When
+            handle.join().unwrap();
+            let calls = verifier.calls();
+
+            // Then
+            assert_eq!(calls, &[1]);
+        }
+
+        #[test]
+        #[should_panic(expected = "verify_call received a call after the verifier was consumed")]
+        fn panics_when_called_after_verification() {
+            // Given
+            let (verifier, caller) = pair();
+            let _calls = verifier.calls();
+
+            // When
+            caller.call(3);
+        }
     }
 
-    #[test]
-    fn should_pass_verifying_calls() {
-        // Given
-        let (verifier, caller) = pair();
-        caller.call(1);
-        caller.call(2);
-        caller.call(3);
+    mod verifier {
+        use super::*;
 
-        // When
-        let calls = verifier.calls();
+        #[test]
+        fn implements_traits() {
+            use impls::impls;
+            use std::fmt::Debug;
 
-        // Then
-        assert_eq!(calls, &[1, 2, 3]);
-    }
+            // Given
+            struct NotDebug;
 
-    #[test]
-    #[should_panic(expected = "verify_call received a call after the verifier was consumed")]
-    fn should_panic_when_call_after_consuming_verifier() {
-        // Given
-        let (verifier, caller) = pair();
-        let _calls = verifier.calls();
+            // Then
+            assert!(impls!(Verifier<i32>: Debug & Send & Sync & !Clone));
+            assert!(impls!(Verifier<NotDebug>: !Debug & Send & Sync & !Clone));
+        }
 
-        // When
-        caller.call(3);
-    }
+        #[test]
+        fn initially_has_no_calls() {
+            // Given
+            let (verifier, _caller) = pair::<()>();
 
-    #[test]
-    fn should_be_thread_safe() {
-        // Given
-        let (verifier, caller) = pair();
-        let handle = std::thread::spawn(move || {
+            // When
+            let calls = verifier.calls();
+
+            // Then
+            assert_eq!(calls.len(), 0);
+        }
+
+        #[test]
+        fn receives_calls_from_caller() {
+            // Given
+            let (verifier, caller) = pair();
             caller.call(1);
             caller.call(2);
             caller.call(3);
-        });
 
-        // When
-        handle.join().unwrap();
-        let calls = verifier.calls();
+            // When
+            let calls = verifier.calls();
 
-        // Then
-        assert_eq!(calls, &[1, 2, 3]);
-    }
-
-    #[test]
-    fn should_implement_traits() {
-        use impls::impls;
-        use std::fmt::Debug;
-
-        assert!(impls!(Caller<i32>: Debug & Send & Sync & !Clone));
-        assert!(impls!(Verifier<i32>: Debug & Send & Sync & !Clone));
-
-        struct NotDebug;
-        assert!(impls!(Caller<NotDebug>: !Debug & Send & Sync & !Clone));
-        assert!(impls!(Verifier<NotDebug>: !Debug & Send & Sync & !Clone));
+            // Then
+            assert_eq!(calls, &[1, 2, 3]);
+        }
     }
 }

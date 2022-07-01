@@ -27,7 +27,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn should_send_email_when_custom_domain() {
+    fn sends_email_with_custom_domain() {
         struct MockEmailSender(verify_call::Caller<String>);
         impl EmailSender for MockEmailSender {
             fn send_email(&self, email_address: &str) -> Result<(), ()> {
@@ -49,7 +49,7 @@ mod tests {
     }
 
     #[test]
-    fn should_fail_when_send_email_fails() {
+    fn fails_to_send_email_with_custom_domain() {
         struct MockEmailSender(verify_call::Caller<String>);
         impl EmailSender for MockEmailSender {
             fn send_email(&self, email_address: &str) -> Result<(), ()> {
@@ -71,7 +71,7 @@ mod tests {
     }
 
     #[test]
-    fn should_not_send_email_when_gmail_domain() {
+    fn doesnt_send_email_with_gmail_domain() {
         struct MockEmailSender(verify_call::Caller<String>);
         impl EmailSender for MockEmailSender {
             fn send_email(&self, email_address: &str) -> Result<(), ()> {

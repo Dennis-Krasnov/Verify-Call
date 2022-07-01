@@ -38,11 +38,9 @@ impl<T> Caller<T> {
     }
 }
 
-impl<T: Debug> Debug for Caller<T> {
+impl<T> Debug for Caller<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Caller")
-            .field("calls", &self.calls)
-            .finish()
+        f.debug_struct("Caller").finish()
     }
 }
 
@@ -59,11 +57,9 @@ impl<T> Verifier<T> {
     }
 }
 
-impl<T: Debug> Debug for Verifier<T> {
+impl<T> Debug for Verifier<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Verifier")
-            .field("calls", &self.calls)
-            .finish()
+        f.debug_struct("Verifier").finish()
     }
 }
 
@@ -84,7 +80,7 @@ mod tests {
 
             // Then
             assert!(impls!(Caller<i32>: Debug & Send & Sync & !Clone));
-            assert!(impls!(Caller<NotDebug>: !Debug & Send & Sync & !Clone));
+            assert!(impls!(Caller<NotDebug>: Debug & Send & Sync & !Clone));
         }
 
         #[test]
@@ -128,7 +124,7 @@ mod tests {
 
             // Then
             assert!(impls!(Verifier<i32>: Debug & Send & Sync & !Clone));
-            assert!(impls!(Verifier<NotDebug>: !Debug & Send & Sync & !Clone));
+            assert!(impls!(Verifier<NotDebug>: Debug & Send & Sync & !Clone));
         }
 
         #[test]

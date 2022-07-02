@@ -5,7 +5,7 @@
 
 //! ...
 
-use std::fmt::{Debug, Formatter};
+use std::fmt::Debug;
 use std::sync::{Arc, Mutex};
 
 /// ...
@@ -22,6 +22,7 @@ pub fn pair<T>() -> (Verifier<T>, Caller<T>) {
 }
 
 /// ...
+#[derive(Debug)]
 pub struct Caller<T> {
     calls: Arc<Mutex<Option<Vec<T>>>>,
 }
@@ -38,13 +39,8 @@ impl<T> Caller<T> {
     }
 }
 
-impl<T> Debug for Caller<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Caller").finish()
-    }
-}
-
 /// ...
+#[derive(Debug)]
 pub struct Verifier<T> {
     calls: Arc<Mutex<Option<Vec<T>>>>,
 }
@@ -54,12 +50,6 @@ impl<T> Verifier<T> {
     pub fn calls(self) -> Vec<T> {
         let mut guard = self.calls.lock().unwrap();
         guard.take().unwrap()
-    }
-}
-
-impl<T> Debug for Verifier<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Verifier").finish()
     }
 }
 
@@ -80,7 +70,7 @@ mod tests {
 
             // Then
             assert!(impls!(Caller<i32>: Debug & Send & Sync & !Clone));
-            assert!(impls!(Caller<NotDebug>: Debug & Send & Sync & !Clone));
+            assert!(impls!(Caller<NotDebug>: !Debug & Send & Sync & !Clone));
         }
 
         #[test]
@@ -124,7 +114,7 @@ mod tests {
 
             // Then
             assert!(impls!(Verifier<i32>: Debug & Send & Sync & !Clone));
-            assert!(impls!(Verifier<NotDebug>: Debug & Send & Sync & !Clone));
+            assert!(impls!(Verifier<NotDebug>: !Debug & Send & Sync & !Clone));
         }
 
         #[test]

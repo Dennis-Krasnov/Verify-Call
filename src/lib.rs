@@ -65,12 +65,19 @@ mod tests {
             use impls::impls;
             use std::fmt::Debug;
 
+            assert!(impls!(Caller<i32>: Debug & Send & Sync & !Clone));
+        }
+
+        #[test]
+        fn conditionally_implements_debug() {
+            use impls::impls;
+            use std::fmt::Debug;
+
             // Given
             struct NotDebug;
 
             // Then
-            assert!(impls!(Caller<i32>: Debug & Send & Sync & !Clone));
-            assert!(impls!(Caller<NotDebug>: !Debug & Send & Sync & !Clone));
+            assert!(impls!(Caller<NotDebug>: !Debug));
         }
 
         #[test]
@@ -109,12 +116,19 @@ mod tests {
             use impls::impls;
             use std::fmt::Debug;
 
+            assert!(impls!(Verifier<i32>: Debug & Send & Sync & !Clone));
+        }
+
+        #[test]
+        fn conditionally_implements_debug() {
+            use impls::impls;
+            use std::fmt::Debug;
+
             // Given
             struct NotDebug;
 
             // Then
-            assert!(impls!(Verifier<i32>: Debug & Send & Sync & !Clone));
-            assert!(impls!(Verifier<NotDebug>: !Debug & Send & Sync & !Clone));
+            assert!(impls!(Verifier<NotDebug>: !Debug));
         }
 
         #[test]
